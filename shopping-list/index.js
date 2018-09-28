@@ -42,6 +42,10 @@ function renderShoppinglist() {
     filteredItems = filteredItems.filter(item => !item.checked);
   }
   
+  if (STORE.searchTerm !== null) {
+    filteredItems = filteredItems.filter(item => item.name.includes(STORE.searchTerm));
+  }
+  
   const shoppingListItemsString = generateShoppingItemsString(filteredItems);
   $('.js-shopping-list').html(shoppingListItemsString);
   console.log('`renderShoppinglist` ran');
@@ -50,6 +54,10 @@ function renderShoppinglist() {
 function addItemtoShoppingList(itemName){
   console.log(`Adding "${itemName}" to shopping list`);
   STORE.items.push({name: itemName, checked: false});
+}
+
+function searchItemsInShoppingList(itemName){
+  STORE.searchTerm = itemName;
 }
 
 function getItemIndexFromElement(item) {
@@ -73,6 +81,7 @@ function toggleHideItems(itemIndex) {
 function deleteListItem(itemIndex) {
   STORE.items.splice(itemIndex, 1);
 }
+
 
 function handleNewItemSubmit() {
   //responsible for when users add a new shopping item list
@@ -112,12 +121,26 @@ function handleToggleHideButton() {
     renderShoppinglist();
   })
 }
+
+function handleSearchTerms () {
+  $('#js-shopping-list-search').submit(function(event){
+    event.preventDefault();
+    const searchTerm = $('.js-searchbox').val();
+    console.log(searchTerm);
+    searchItemsInShoppingList(searchTerm);
+    renderShoppinglist();
+  });
+}
+
+
+
 function handleShoppingList() {
   renderShoppinglist();
   handleNewItemSubmit();
   handleItemCheckClicked();
   handleToggleHideButton();
   handleDeleteItemClicked();
+  handleSearchTerms();
 
 }
 
