@@ -1,5 +1,5 @@
 'use strict';
-
+//data set
 const STORE = {
   items: [
     {name: 'apple', checked: false},
@@ -11,11 +11,15 @@ const STORE = {
   searchTerm: null,
 };
 
+//supplementary functions
 function generateItemElement(item, itemIndex, template) {
   return `
     <li class="js-item-index-element" data-item-index="${itemIndex}">
       <span class="shopping-item js-shopping-item ${item.checked ? "shopping-item__checked" : ''}">${item.name}</span>
       <div class="shopping-item-controls">
+        <button class="shopping-item-edit js-item-edit">
+          <span class="button-label">edit</span>
+        </button> 
         <button class="shopping-item-toggle js-item-toggle">
             <span class="button-label">check</span>
         </button>
@@ -32,23 +36,6 @@ function generateShoppingItemsString(shoppingList) {
   const items = shoppingList.map((item, index) => generateItemElement(item, index));
 
   return items.join('');
-}
-
-function renderShoppinglist() {
-  //render the shopping list in the DOM
-  let filteredItems = Array.from(STORE.items);
-
-  if (STORE.hideCompleted === true) {
-    filteredItems = filteredItems.filter(item => !item.checked);
-  }
-  
-  if (STORE.searchTerm !== null) {
-    filteredItems = filteredItems.filter(item => item.name.includes(STORE.searchTerm));
-  }
-  
-  const shoppingListItemsString = generateShoppingItemsString(filteredItems);
-  $('.js-shopping-list').html(shoppingListItemsString);
-  console.log('`renderShoppinglist` ran');
 }
 
 function addItemtoShoppingList(itemName){
@@ -82,6 +69,44 @@ function deleteListItem(itemIndex) {
   STORE.items.splice(itemIndex, 1);
 }
 
+function editListItem(itemIndex, itemEdit) {
+  STORE.items.splice(itemIndex, 1, itemEdit);
+}
+
+function editChangeForm(itemIndex) {
+  $(`[data-item-index="${itemIndex}"`)
+    .find('.shopping-item')
+    .replaceWith('<input type= "text" class="edittext"><button class= "editsubmit">Submit Changes</button>');
+  editSubmit(itemIndex);
+}
+
+function editSubmit(itemIndex) {
+  $('.editsubmit').click(event => {
+    event.preventDefault();
+    console.log('submit is working!!!!');
+    let edit = $('.edittext').val();
+    editListItem(itemIndex, { name: edit, checked: false });
+    renderShoppinglist();
+  });
+}
+
+//main program functions
+function renderShoppinglist() {
+  //render the shopping list in the DOM
+  let filteredItems = Array.from(STORE.items);
+
+  if (STORE.hideCompleted === true) {
+    filteredItems = filteredItems.filter(item => !item.checked);
+  }
+  
+  if (STORE.searchTerm !== null) {
+    filteredItems = filteredItems.filter(item => item.name.includes(STORE.searchTerm));
+  }
+  
+  const shoppingListItemsString = generateShoppingItemsString(filteredItems);
+  $('.js-shopping-list').html(shoppingListItemsString);
+  console.log('`renderShoppinglist` ran');
+}
 
 function handleNewItemSubmit() {
   //responsible for when users add a new shopping item list
@@ -122,7 +147,7 @@ function handleToggleHideButton() {
   })
 }
 
-function handleSearchTerms () {
+function handleSearchTerms() {
   $('#js-shopping-list-search').submit(function(event){
     event.preventDefault();
     const searchTerm = $('.js-searchbox').val();
@@ -132,6 +157,13 @@ function handleSearchTerms () {
   });
 }
 
+function handleEditItemName() {
+  $('.js-shopping-list').on('click', '.js-item-edit', event => {
+    console.log('`handleEditItemName` ran');
+    const itemIndex = getItemIndexFromElement(event.currentTarget);
+    editChangeForm(itemIndex);
+  });
+}
 
 
 function handleShoppingList() {
@@ -141,7 +173,7 @@ function handleShoppingList() {
   handleToggleHideButton();
   handleDeleteItemClicked();
   handleSearchTerms();
-
+  handleEditItemName();
 }
 
 $(handleShoppingList);
